@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="fa69447b-6f56-49ac-979a-ece63f59761f" basePath="/" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="arraytostring" doc:id="4739fd74-e3c6-4e14-81f0-f41d4cfa09bd" >
+		<http:listener doc:name="Listener" doc:id="5a29ac9c-6435-47da-b36f-9003849d5956" config-ref="HTTP_Listener_config" path="/arraytostring"/>
+		<ee:transform doc:name="Transform Message" doc:id="a8903160-24e5-4d28-bead-971357949be6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var arr = [1,2,3,4,5]
+var str = ''
+---
+arr joinBy ","]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="stringtoarray" doc:id="52a7baa8-527f-44c3-9a99-c99061d1d241" >
+		<http:listener doc:name="Listener" doc:id="e235fbda-5d21-4816-9004-9c41630da012" config-ref="HTTP_Listener_config" path="/stringtoarray"/>
+		<ee:transform doc:name="Transform Message" doc:id="fce70f4d-ae03-4fe4-992f-3521354ae965" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var str = "1,2,3,4,5"
+var arr = str splitBy ","
+var out = arr map (n) -> (n as Number)
+---
+out]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow3" doc:id="1c60dd26-17ff-412e-8f04-f8e68b75dfe6" >
+		<http:listener doc:name="Listener" doc:id="65bf6321-07ce-4042-80dc-b3973464f1ff" config-ref="HTTP_Listener_config" path="/iterate"/>
+		<ee:transform doc:name="Transform Message" doc:id="c955e6af-c2f8-44d4-9902-c463a72e7491" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var neededItems = (message.attributes.queryParams['totalCount'] as Number) - 1
+---
+(payload.employees map ((n)->
+	n
+))[0 to neededItems]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0de1970f-2642-4e45-af60-b83e38521d1c" />
+	</flow>
+	<flow name="dwusecaseFlow" doc:id="c0781bd8-8738-4715-8ea5-7eff3cc583bc">
+		<http:listener doc:name="Listener" doc:id="5f99ad31-e0f2-4011-b787-22f849c3ab1f" config-ref="HTTP_Listener_config" allowedMethods="POST" path="/jsontocsv"/>
+		<ee:transform doc:name="Transform Message" doc:id="1b7597bd-84ff-4b3a-9e6b-ea1aa8a5e862" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv header=true
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow1" doc:id="595647f9-7077-41cf-a8dc-d0b1e986b91d" >
+		<http:listener doc:name="Listener" doc:id="928320a5-0c3e-4fa6-b075-8e53dda64731" config-ref="HTTP_Listener_config" path="/datetime"/>
+		<ee:transform doc:name="Transform Message" doc:id="e5c16b6c-dd0e-4f4d-a109-4796c7918bdb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var date1 = |2022-06-16| as Date
+var date2 = |2023-06-16| as Date
+---
+{
+	"firstDate": date1,
+	"secondDate":date2,
+	"period Difference days": (date2-date1) as Number {unit: "days"},
+	"day1 day of week": date1.dayOfWeek,
+	"day2 day of week": date2.dayOfWeek
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow2" doc:id="db248068-1bc1-4eb6-984f-d409d7d047bc" >
+		<http:listener doc:name="Listener" doc:id="e20bbfbe-de92-4fae-ac80-9530ffc0c8a6" config-ref="HTTP_Listener_config" path="/array"/>
+		<ee:transform doc:name="Transform Message" doc:id="4f5a4603-7050-41c7-9111-8799dfad3c66" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var arr = [[1,2],[3,4],[5,6]]
+---
+{
+"array":arr,
+"flattened array": flatten(arr),
+"flattened array evens": flatten(arr) filter (n) -> mod(n,2) == 0,
+"flattened array squared": flatten(arr) map (n) -> n*n,
+"flattened array sum": flatten(arr) reduce (n,t) -> t+n
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow4" doc:id="5d5863df-db40-4ac4-bda7-f770fcf18b0f" >
+		<http:listener doc:name="Listener" doc:id="9096685a-d312-45a2-b0d1-ec396813f7cb" config-ref="HTTP_Listener_config" path="/nullcheck"/>
+		<set-variable value="#[null]" doc:name="Set Variable" doc:id="c83bde09-8c6c-43e5-a3c6-852bef72dba4" variableName="nullvar"/>
+		<set-variable value='#["this var is not null"]' doc:name="Set Variable" doc:id="9a0fd348-4e9d-43da-9d8c-be3b914e73d2" variableName="notnull"/>
+		<ee:transform doc:name="Transform Message" doc:id="f1f0bc60-d42f-4337-9b01-89660d3c955b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"null variable": vars.nullvar default "this value is null",
+	"not null variable": vars.notnull default "this value is null"
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow5" doc:id="6efcd7a0-a6c3-4e70-8ec4-7ef863fd4b63" >
+		<http:listener doc:name="Listener" doc:id="ba818488-d306-423c-89b0-d1cbb6260649" config-ref="HTTP_Listener_config" path="/jsonnoindent"/>
+		<ee:transform doc:name="Transform Message" doc:id="9d7efbf6-a9e8-451e-9fb6-7fa6c81fcafe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json indent = false
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow6" doc:id="4106c0f3-7b6b-4255-9976-ebacba59b213" >
+		<http:listener doc:name="Listener" doc:id="2feb5f3b-d3f4-409f-9918-4e58a856e3ea" config-ref="HTTP_Listener_config" path="/xml"/>
+		<ee:transform doc:name="Transform Message" doc:id="530d8f1a-0195-429d-a040-60937b028b5e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"makes of the planes": payload.planes.*plane.make,
+"second planes model": payload.planes[1].model,
+"number of planes": sizeOf(payload.planes)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dwusecaseFlow7" doc:id="eef5225f-66a3-4a84-9b8b-d46b89d04baa" >
+		<http:listener doc:name="Listener" doc:id="d52af9e6-595f-4a74-baf7-fc9357d54ef8" config-ref="HTTP_Listener_config" path="/replace"/>
+		<ee:transform doc:name="Transform Message" doc:id="e8a348f0-310c-4956-87bb-8361e1cded77" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload replace /displayLength: [0-9]+/ with ("displayLength: -1")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

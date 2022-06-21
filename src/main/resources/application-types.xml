@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="json" format="json">
+      <types:shape format="weave" example="examples/testexample.json"><![CDATA[%dw 2.0
+
+type json = {|
+  id: String, 
+  message: String
+|} {"example": "{\\\"id\\\":\\\"1\\\",\\\"message\\\":\\\"Hello World\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="planes" format="xml">
+      <types:example format="xml" element="planes" location="examples/planes.xml"/>
+    </types:type>
+    <types:type name="iteratoejson" format="json">
+      <types:shape format="weave" example="examples/iteratejson.json"><![CDATA[%dw 2.0
+
+type iteratoejson = {|
+  employees: Array<{|    name: String,     age: Number {"typeId": "int"}  |}>
+|} {"example": "{\\\"employees\\\":[{\\\"name\\\":\\\"Sam\\\",\\\"age\\\":34},{\\\"name\\\":\\\"Richard\\\",\\\"age\\\":38},{\\\"name\\\":\\\"Harry\\\",\\\"age\\\":36},{\\\"name\\\":\\\"Tom\\\",\\\"age\\\":40},{\\\"name\\\":\\\"David\\\",\\\"age\\\":84},{\\\"name\\\":\\\"Chris\\\",\\\"age\\\":52}]}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#9d7efbf6-a9e8-451e-9fb6-7fa6c81fcafe"/>
+  <types:enrichment select="#530d8f1a-0195-429d-a040-60937b028b5e">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="planes"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c955e6af-c2f8-44d4-9902-c463a72e7491">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="iteratoejson"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
